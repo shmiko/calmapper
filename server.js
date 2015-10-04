@@ -81,6 +81,13 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(function(req, res, next) {
+    if (req.user) {
+        res.cookie('user', JSON.stringify(req.user));
+    }
+    next();
+});
+
 app.get('/api/shows', function(req, res, next) {
     var query = Show.find();
     if (req.query.genre) {
@@ -187,6 +194,28 @@ app.post('/api/shows', function(req, res, next) {
 app.get('*', function(req, res) {
     res.redirect('/#' + req.originalUrl);
 });
+
+app.post('/api/login', passport.authenticate('local'), function(req, res) {
+    res.cookie('user', JSON.stringify(req.user));
+    res.send(req.user);
+});
+
+app.post('/api/signup', function(req, res, next) {
+    var user = new User({
+        email: req.body.email,
+        password: req.body.password
+    });
+    user.save(function(err) {
+        if (err) return next(err);
+        res.send(200);
+    });
+});
+
+app.get('/api/logout', function(req, res, next) {
+    req.logout();
+    res.send(200);
+});
+
 
 
 app.use(function(err, req, res, next) {

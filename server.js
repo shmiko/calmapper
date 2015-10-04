@@ -1,5 +1,13 @@
-var mongoose = require('mongoose');
+var path = require('path');
+var express = require('express');
+var bodyParser = require('body-parser');
+var logger = require('morgan');
 var bcrypt = require('bcryptjs');
+var mongoose = require('mongoose');
+var async = require('async');
+var request = require('request');
+var xml2js = require('xml2js');
+var _ = require('lodash');
 
 var showSchema = new mongoose.Schema({
     _id: Number,
@@ -54,11 +62,9 @@ userSchema.methods.comparePassword = function(candidatePassword, cb) {
 var User = mongoose.model('User', userSchema);
 var Show = mongoose.model('Show', showSchema);
 mongoose.connect('localhost');
-var express = require('express');
-var path = require('path');
-var logger = require('morgan');
+
+
 var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
 
 var app = express();
 
@@ -69,20 +75,21 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-//app.get('/api/shows', function(req, res, next) {
-//    var query = Show.find();
-//    if (req.query.genre) {
-//        query.where({ genre: req.query.genre });
-//    } else if (req.query.alphabet) {
-//        query.where({ name: new RegExp('^' + '[' + req.query.alphabet + ']', 'i') });
-//    } else {
-//        query.limit(12);
-//    }
-//    query.exec(function(err, shows) {
-//        if (err) return next(err);
-//        res.send(shows);
-//    });
-//});
+app.get('/api/shows', function(req, res, next) {
+    var query = Show.find();
+    if (req.query.genre) {
+        query.where({ genre: req.query.genre });
+    } else if (req.query.alphabet) {
+        query.where({ name: new RegExp('^' + '[' + req.query.alphabet + ']', 'i') });
+    } else {
+        query.limit(12);
+    }
+    query.exec(function(err, shows) {
+        if (err) return next(err);
+        res.send(shows);
+    });
+});
+
 app.get('/api/shows/:id', function(req, res, next) {
     Show.findById(req.params.id, function(err, show) {
         if (err) return next(err);
@@ -90,9 +97,6 @@ app.get('/api/shows/:id', function(req, res, next) {
     });
 });
 
-app.get('*', function(req, res) {
-    res.redirect('/#' + req.originalUrl);
-});
 app.post('/api/shows', function(req, res, next) {
     var apiKey = 'E20857CE2BB8AD30';
     var parser = xml2js.Parser({
@@ -172,6 +176,12 @@ app.post('/api/shows', function(req, res, next) {
         });
     });
 });
+
+
+app.get('*', function(req, res) {
+    res.redirect('/#' + req.originalUrl);
+});
+
 
 app.use(function(err, req, res, next) {
     console.error(err.stack);

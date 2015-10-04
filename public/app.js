@@ -2,7 +2,7 @@
  * Created by pauljones on 29/09/15.
  */
 angular.module('CalMapper', ['ngCookies', 'ngResource', 'ngMessages', 'ngRoute', 'mgcrea.ngStrap'])
-    .config(['$locationProvider', function($locationProvider) {
+    .config(['$locationProvider','$routeProvider', function($locationProvider, $routeProvider) {
         $locationProvider.html5Mode(true);
 
         $routeProvider

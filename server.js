@@ -8,6 +8,9 @@ var async = require('async');
 var request = require('request');
 var xml2js = require('xml2js');
 var _ = require('lodash');
+var session = require('express-session');
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
 
 var showSchema = new mongoose.Schema({
     _id: Number,
@@ -73,6 +76,9 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(session({ secret: 'keyboard cat' }));
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/shows', function(req, res, next) {
@@ -191,5 +197,10 @@ app.use(function(err, req, res, next) {
 app.listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
 });
+
+function ensureAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) next();
+    else res.send(401);
+}
 
 var tt;

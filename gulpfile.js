@@ -5,6 +5,7 @@ var ngAnnotate = require('gulp-ng-annotate');
 var uglify = require('gulp-uglify');
 var concat = require('gulp-concat');
 var plumber = require('gulp-plumber');
+var nodemon = require('gulp-nodemon');
 
 var templateCache = require('gulp-angular-templatecache');
 
@@ -45,3 +46,11 @@ gulp.task('watch', function() {
 });
 
 gulp.task('default', ['sass', 'compress', 'templates', 'watch']);
+
+gulp.task('start', function () {
+  nodemon({
+    script: 'server.js'
+    , ext: 'js html'
+    , env: { 'NODE_ENV': 'development' }
+  })
+})
